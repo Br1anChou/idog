@@ -19,30 +19,13 @@
 
 ###parameter###
 ref_dir=/path/reference/UU_Cfam_GSD_1.0
-tmp_dir=/p300s/zhaowm_group/tangbx/idog/tmp
-#fastq_dir=/gpfs/zhaowm_group/wangyibo/epigenome/ATAC/PRJEB20256
+tmp_dir=/path/tmp
 fastq_dir=$1
-#out_dir=/p300s/zhaowm_group/tangbx/idog/atac_result
 out_dir=$2
-#r1_file=SRR8090327.fastq.gz
-#sample_id=ERR1912239
 sample_id=$3
-#ncpus=10
 ncpus=$4
-#ramGB=60
 ramGB=$5
 #############
-
-###private environment###
-script=/p300s/zhaowm_group/tangbx/idog/test/atac
-software=/software/biosoft/software/picard2.22.8/picard/build/libs
-source activate /p300s/zhaowm_group/tangbx/software/miniconda3/envs/RNAseq_E4
-export PERL5LIB="/p300s/zhaowm_group/tangbx/software/miniconda3/envs/RNAseq_E4/lib/perl5/5.32"
-export JAVA_HOME=/software/biosoft/software/jdk1.8/jdk1.8.0_45
-export PATH=$JAVA_HOME/bin:$JAVA_HOME/jre/bin:$PATH
-export CLASSPATH=$JAVA_HOME/lib:$JAVA_HOME/jre/lib:$CLASSPATH
-export JRE_HOME=$JAVA_HOME/jre
-############
 
 ###fastp###
 mkdir -p ${out_dir}/${sample_id}/fastp
