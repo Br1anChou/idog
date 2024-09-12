@@ -1,0 +1,87 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+
+# @File       :calcuMethylation
+# @Time       :2024/6/25 10:48
+# @Author     :zhoubw
+# @Product    :DataSpell
+# @Project    :RNAseq_pipeline
+# @Version    :python 3.10.6
+# @Description:
+# @Usage      :python script.py -g path/to/file.gtf -i path/to/CX_report.txt -o path/to/output.txt -p 4
+
+import pandas as pd
+import argparse
+from multiprocessing import Pool
+
+def parse_gtf(file_path):
+	genes = {}
+	with open(file_path, 'r') as gtf_file:
+		for line in gtf_file:
+			if line.startswith('#'):
+				continue
+			parts = line.strip().split('\t')
+			if parts[2] == 'gene':
+				chrom = parts[0]
+				start = int(parts[3])
+				end = int(parts[4])
+				strand = parts[6]
+				info = parts[8]
+				gene_id = None
+				for entry in info.split(';'):
+					if entry.strip().startswith('gene_id'):
+						gene_id = entry.strip().split(' ')[1].replace('"', '')
+						break
+				if gene_id:
+					genes[gene_id] = {'chrom': chrom, 'start': start, 'end': end, 'strand': strand}
+	return genes
+
+def parse_cx_report(file_path):
+	cx_data = pd.read_csv(file_path, sep='\t', header=None, names=['chrom', 'start', 'strand', 'meth_count', 'unmeth_count', 'context', 'sequence'])
+	return cx_data
+
+def calculate_methylation_for_gene(gene_data):
+	gene_id, gene_info, cx_data = gene_data
+	chrom = gene_info['chrom']
+	start = gene_info['start']
+	end = gene_info['end']
+	strand = gene_info['strand']
+	gene_region = cx_data[(cx_data['chrom'] == chrom) & (cx_data['start'] >= start) & (cx_data['start'] <= end)]
+
+	cg_data = gene_region[gene_region['context'] == 'CG']
+	chg_data = gene_region[gene_region['context'] == 'CHG']
+	chh_data = gene_region[gene_region['context'] == 'CHH']
+
+	cg_rate = cg_data['meth_count'].sum() / (cg_data['meth_count'].sum() + cg_data['unmeth_count'].sum()) if not cg_data.empty else 0
+	chg_rate = chg_data['meth_count'].sum() / (chg_data['meth_count'].sum() + chg_data['unmeth_count'].sum()) if not chg_data.empty else 0
+	chh_rate = chh_data['meth_count'].sum() / (chh_data['meth_count'].sum() + chh_data['unmeth_count'].sum()) if not chh_data.empty else 0
+
+	return [gene_id, chrom, start, end, strand, cg_rate, chg_rate, chh_rate]
+
+def calculate_methylation_parallel(genes, cx_data, num_workers):
+	gene_data = [(gene_id, gene_info, cx_data) for gene_id, gene_info in genes.items()]
+	with Pool(processes=num_workers) as pool:
+		results = pool.map(calculate_methylation_for_gene, gene_data, chunksize=len(gene_data)//num_workers)
+	return results
+
+def write_results(results, output_file):
+	with open(output_file, 'w') as out_file:
+		out_file.write("gene_id\tchrom\tstart\tend\tstrand\tCG_rate\tCHG_rate\tCHH_rate\n")
+		for result in results:
+			out_file.write("\t".join(map(str, result)) + "\n")
+
+def main(gtf_file, cx_report_file, output_file, num_workers):
+	genes = parse_gtf(gtf_file)
+	cx_data = parse_cx_report(cx_report_file)
+	results = calculate_methylation_parallel(genes, cx_data, num_workers)
+	write_results(results, output_file)
+
+if __name__ == "__main__":
+	parser = argparse.ArgumentParser(description='Calculate gene methylation levels from GTF and CX report files.')
+	parser.add_argument('-g', '--gtf', type=str, required=True, help='Path to the GTF file.')
+	parser.add_argument('-i', '--input', type=str, required=True, help='Path to the CX_report.txt file.')
+	parser.add_argument('-o', '--output', type=str, required=True, help='Path to the output file.')
+	parser.add_argument('-p', '--cpu', type=int, default=4, help='Number of worker processes for parallel processing.')
+	args = parser.parse_args()
+
+	main(args.gtf, args.input, args.output, args.cpu)
