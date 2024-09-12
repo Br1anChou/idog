@@ -7,12 +7,11 @@
 # @Product    :DataSpell
 # @Project    :RNAseq_pipeline
 # @Version    :python 3.10.6
-# @Description:
-# @Usage      :python calcuMethyLevel.py -i methylation_CpG/CHG/CHH_context.txt.gz -o methylation_level.txt -b regions.bed
+# @Description:calculate the methylation level within the regions
+# @Usage      :python calcuMethyLevel.py -i <methylation_CpG/CHG/CHH_context.txt.gz> -o <methylation_level.txt> -b <regions.bed>
 
 import os
 from typing import List
-
 # os.chdir('/Users/zhoubw/DataSpellProjects/idog/WGBS')
 
 import pandas as pd

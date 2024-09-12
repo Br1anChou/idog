@@ -5,13 +5,15 @@
 # @Author     :zhoubw
 # @Product    :DataSpell
 # @Project    :WGBS_pipeline
-# @Version    :
-# @Description:
-# @Usage      :
+# @Version    :1.0.0
+# @Description:main script for BS-seq pipeline
+# @Usage      :bash WGBS_E3.sh <fastq_dir> <out_dir> <sample_id> <ncpus> <ramGB>
 
 
 ###software vision###
 #fastp:0.23.2
+#bismark 0.23.1
+#bowtie2:2.5.4
 
 ###parameter###
 ref_dir=/p300s/zhaowm_group/tangbx/reference/UU_Cfam_GSD_1.0
