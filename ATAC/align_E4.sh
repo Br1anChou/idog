@@ -18,7 +18,7 @@
 #macs2:2.2.4
 
 ###parameter###
-ref_dir=/p300s/zhaowm_group/tangbx/reference/UU_Cfam_GSD_1.0
+ref_dir=/path/reference/UU_Cfam_GSD_1.0
 tmp_dir=/p300s/zhaowm_group/tangbx/idog/tmp
 #fastq_dir=/gpfs/zhaowm_group/wangyibo/epigenome/ATAC/PRJEB20256
 fastq_dir=$1
