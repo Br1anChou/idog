@@ -1,17 +1,21 @@
 #!/usr/bin/env bash
 
-# @File       :ATAC_E4
+# @File       :ATAC_E4.sh
 # @Time       :2024/8/23 10:44
 # @Author     :zhoubw
 # @Product    :DataSpell
-# @Project    :atac_pipeline
-# @Version    :
-# @Description:
-# @Usage      :
+# @Project    :ATAC_pipeline
+# @Version    :1.0.0
+# @Description:main script for ATAC_pipeline
+# @Usage      :bash ATAC_E4.sh <fastq_dir> <out_dir> <sample_id> <ncpus> <ramGB>
 
 ###software vision###
 #fastp:0.23.2
-
+#bowte2:2.5.3
+#samtools:1.15.1
+#picard:2.22.8
+#bedtools:2.31.1
+#macs2:2.2.4
 
 ###parameter###
 ref_dir=/p300s/zhaowm_group/tangbx/reference/UU_Cfam_GSD_1.0

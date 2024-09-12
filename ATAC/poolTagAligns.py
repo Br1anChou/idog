@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-# @File       :poolTagAligns
+# @File       :poolTagAligns.py
 # @Time       :2024/9/1 14:54
 # @Author     :zhoubw
 # @Product    :DataSpell
 # @Project    :atac_pipeline
 # @Version    :python 3.10.6
-# @Usage      :
+# @Usage      :python poolTagAligns.py <output_name> <input_file1> <input_file2> ...
 
 import os
 import subprocess
 import sys
 from sys import exit
-
 
 def pool_ta(output_name, tas, out_dir='.'):
 	if len(tas) > 1:
