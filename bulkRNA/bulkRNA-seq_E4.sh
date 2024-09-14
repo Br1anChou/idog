@@ -16,25 +16,14 @@
 #rsem:1.3.3
 
 ###parameter###
-ref_dir=/p300s/zhaowm_group/tangbx/reference/UU_Cfam_GSD_1.0
-#fastq_dir=/p300s/zhaowm_group/tangbx/idog/test
+ref_dir=/path/reference/UU_Cfam_GSD_1.0
 fastq_dir=$1
-#out_dir=/p300s/zhaowm_group/tangbx/idog/test
 out_dir=$2
-#r1_file=SRR8090327.fastq.gz
-#sample_id=SRR8090327
 sample_id=$3
-#ncpus=10
 ncpus=$4
-#ramGB=120
 ramGB=$5
 fwd_prob=0.5
 #############
-
-###private environment###
-source activate RNAseq_E4
-export PERL5LIB="/p300s/zhaowm_group/tangbx/software/miniconda3/envs/RNAseq_E4/lib/perl5/5.32"
-############
 
 # Check for the existence of files ending with '_1.fastq.gz' or '_2.fastq.gz'
 PE_raw=$(find "${fastq_dir}/${sample_id}/reads/" -type f \( -name "${sample_id}_1.fastq.gz" -o -name "${sample_id}_2.fastq.gz" \))
