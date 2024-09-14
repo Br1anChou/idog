@@ -7,7 +7,7 @@
 ###parameter###
 software_dir=/PATH/sratoolkit.3.0.2-centos_linux64/bin
 out_dir=/PATH
-sample_id=SRR13339272
+sample_id=SRRXXXX
 ncpus=10
 ##############
 
