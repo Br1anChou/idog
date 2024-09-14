@@ -1,5 +1,14 @@
 #!/bin/bash -e
 
+# @File       :bulkRNA-seq_E4.sh
+# @Time       :2024/5/6 16:12
+# @Author     :zhoubw
+# @Product    :DataSpell
+# @Project    :bulkRNA_pipeline
+# @Version    :1.0.0
+# @Description:measure RNA abundance
+# @Usage      :bash bulkRNA-seq_E4.sh <fastq_dir> <out_dir> <sample_id> <ncpus> <ramGB>
+
 ###software vision###
 #fastp:0.23.2
 #kallisto:0.46.0
@@ -27,17 +36,17 @@ source activate RNAseq_E4
 export PERL5LIB="/p300s/zhaowm_group/tangbx/software/miniconda3/envs/RNAseq_E4/lib/perl5/5.32"
 ############
 
-###fastp###
-mkdir -p ${out_dir}/${sample_id}/fastp
-# 检查是否存在以_1.fastq.gz或_2.fastq.gz结尾的文件
+# Check for the existence of files ending with '_1.fastq.gz' or '_2.fastq.gz'
 PE_raw=$(find "${fastq_dir}/${sample_id}/reads/" -type f \( -name "${sample_id}_1.fastq.gz" -o -name "${sample_id}_2.fastq.gz" \))
-# 检查是否存在以.fastq.gz结尾的文件
+# Check for the existence of files ending with '.fastq.gz'
 SE_raw=$(find "${fastq_dir}/${sample_id}/reads/" -type f -name "${sample_id}.fastq.gz")
 
-# 判断条件并执行相应的代码
+###run fastp###
+mkdir -p ${out_dir}/${sample_id}/fastp
+###Determine sequencing strategy and execute code
 if [[ -n "$PE_raw" && -z "$SE_raw" ]]; then
-    # PE代码的内容
-    echo "...run PE pipeline..."
+    # clean data for PE reads
+    echo "...run fastp PE pipeline..."
     paired_end=0
     fastp -g -q 5 -u 50 -n 5 \
     -i ${fastq_dir}/${sample_id}/reads/${sample_id}_1.fastq.gz \
@@ -49,8 +58,8 @@ if [[ -n "$PE_raw" && -z "$SE_raw" ]]; then
     -R "${sample_id}_fastp_report"
 
 elif [[ -z "$PE_raw" && -n "$SE_raw" ]]; then
-    # SE代码的内容
-    echo "...run SE pipeline..."
+    # clean data for SE reads
+    echo "...run fastp SE pipeline..."
     paired_end=1
     fastp -g -q 5 -u 50 -n 5 \
     -i ${fastq_dir}/${sample_id}/reads/${sample_id}.fastq.gz \
@@ -64,19 +73,18 @@ else
     exit 1
 fi
 
-###kallisto###
+
+# Check for the existence of files ending with 'clean.R1.fastq.gz' or 'clean.R2.fastq.gz'
+PE_clean=$(find "${out_dir}/${sample_id}/fastp/" -type f \( -name "${sample_id}.clean.R1.fastq.gz" -o -name "${sample_id}.clean.R2.fastq.gz" \))
+# Check for the existence of files ending with 'clean.fastq.gz'
+SE_clean=$(find "${out_dir}/${sample_id}/fastp/" -type f -name "${sample_id}.clean.fastq.gz")
+
+### run kallisto###
 mkdir -p ${out_dir}/${sample_id}/kallisto_gene
 mkdir -p ${out_dir}/${sample_id}/kallisto_transcript
 mkdir -p ${out_dir}/${sample_id}/star
 
-# 检查是否存在以clean.R1.fastq.gz或clean.R2.fastq.gz结尾的文件
-PE_clean=$(find "${out_dir}/${sample_id}/fastp/" -type f \( -name "${sample_id}.clean.R1.fastq.gz" -o -name "${sample_id}.clean.R2.fastq.gz" \))
-# 检查是否存在以clean.fastq.gz结尾的文件
-SE_clean=$(find "${out_dir}/${sample_id}/fastp/" -type f -name "${sample_id}.clean.fastq.gz")
-
-# 判断条件并执行相应的代码
 if [[ -n "$PE_clean" && -z "$SE_clean" && "$paired_end" -eq 0 ]]; then
-    # PE代码的内容
     echo "Input files: $PE_clean"
     kallisto quant \
     -t ${ncpus} --fusion --plaintext \
@@ -118,7 +126,6 @@ if [[ -n "$PE_clean" && -z "$SE_clean" && "$paired_end" -eq 0 ]]; then
     --limitBAMsortRAM ${ramGB}000000000
 
 elif [[ -z "$PE_clean" && -n "$SE_clean" && "$paired_end" -eq 1 ]]; then
-    # SE代码的内容
     echo "Input files: $SE_clean"
     kallisto quant \
     -t ${ncpus} --fusion --plaintext --single -l 200 -s 20 \
@@ -163,11 +170,11 @@ else
     exit 1
 fi
 
-###rsem###
+###run rsem###
 mkdir -p ${out_dir}/${sample_id}/rsem
 bam_file="${out_dir}/${sample_id}/star/${sample_id}.gsd.Aligned.sortedByCoord.out.bam"
 
-# 检查BAM文件是否存在
+# Checking for the BAM files
 if [ -f "$bam_file" ]; then
     STAR \
     --runMode inputAlignmentsFromBAM \
@@ -179,9 +186,7 @@ if [ -f "$bam_file" ]; then
 
     rsem-calculate-expression --version
 
-    # 检查paired_end的值
     if [ "$paired_end" -eq 0 ]; then
-        # PE代码的内容
         rsem-calculate-expression \
         --bam \
         --estimate-rspd \
@@ -195,7 +200,6 @@ if [ -f "$bam_file" ]; then
         ${out_dir}/${sample_id}/rsem/${sample_id}_rsem
 
     elif [ "$paired_end" -eq 1 ]; then
-        # SE代码的内容
         rsem-calculate-expression \
         --bam \
         --estimate-rspd \
