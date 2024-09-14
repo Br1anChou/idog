@@ -14,21 +14,22 @@ import os
 from typing import List
 # os.chdir('/Users/zhoubw/DataSpellProjects/idog/WGBS')
 
+import subprocess
 import pandas as pd
 from intervaltree import IntervalTree
 import argparse
 import gzip
 
 
-def process_files(txt_file, bed_file, output_file):
-	# 读取bed文件，提取基因区间信息并建立区间树
+def calcu_methy(txt_file, bed_file, output_file):
+	# Read bed files, extract gene information and build interval trees
 	bed_columns = ["chrom", "start", "end", "gene_name", "score", "strand"]
 	bed_df = pd.read_csv(bed_file, sep="\t", header=None, names=bed_columns)
 
-	# 初始化存储每条染色体的区间树
+	# Initialise the interval tree that stores each chromosome
 	chrom_intervals = {}
 
-	# 遍历bed文件构建区间树
+	# Iterating bed files to construct interval trees
 	for _, row in bed_df.iterrows():
 		chrom = str(row["chrom"])
 		start = row["start"]
@@ -47,33 +48,33 @@ def process_files(txt_file, bed_file, output_file):
 			"gene_length": gene_length
 		}
 
-	# 自动识别压缩或非压缩文件并进行处理
+	# Identify compressed or uncompressed files
 	if txt_file.endswith(".gz"):
 		file_open = gzip.open
 	else:
 		file_open = open
 
-	# 处理txt文件，利用区间树快速查找位点所属的基因区间
+	# Quickly find the gene regions
 	with file_open(txt_file, "rt") as f:
 		line_number = 0
 		for line in f:
 			line_number += 1
 			parts = line.strip().split("\t")
 
-			# 确保每一行有5列，否则跳过
+			# Make sure the file has 5 columns per line
 			if len(parts) != 5:
 				print(f"Skipping line {line_number}: expected 5 columns, got {len(parts)}. Content: {parts}")
 				continue
 
 			try:
 				_, sign, chrom, position, _ = parts
-				chrom = str(chrom)  # 确保染色体号为字符串类型
+				chrom = str(chrom)  # Make sure the chromosome number is string
 				position = int(position)
 			except ValueError as e:
 				print(f"Error parsing line {line_number}: {e}. Content: {parts}")
 				continue
 
-			# 查找位点所在的基因区间
+			# Find the gene region in which the locus is located
 			if chrom in chrom_intervals:
 				overlapping_intervals = chrom_intervals[chrom][position]
 				for interval in overlapping_intervals:
@@ -82,7 +83,7 @@ def process_files(txt_file, bed_file, output_file):
 					elif sign == "-":
 						interval.data["minus_count"] += 1
 
-	# 将结果写入输出文件
+	# write output
 	with open(output_file, "w") as f:
 		f.write(
 			"gene_name\tregion_length\tmethylated_count\tunmethylated_count\tmethylated_percentage\tunmethylated_percentage\n")
@@ -97,6 +98,23 @@ def process_files(txt_file, bed_file, output_file):
 				f.write(f"{gene_name}\t{gene_length}\t{plus_count}\t{minus_count}\t"
 				        f"{plus_percentage:.2f}\t{minus_percentage:.2f}\n")
 
+# Sort and remove duplicates
+def run_shell_command(input_file, sorted_file):
+	if input_file.endswith(".gz"):
+		cmd = f"""
+        pigz -dc {input_file} | \\
+        tail -n +2 | \\
+        sort -k3,3 -k4,4n | \\
+        awk '!seen[$2,$3,$4,$5]++' > {sorted_file}
+        """
+	else:
+		cmd = f"""
+        tail -n +2 {input_file} | \\
+        sort -k3,3 -k4,4n | \\
+        awk '!seen[$2,$3,$4,$5]++' > {sorted_file}
+        """
+
+	subprocess.run(cmd, shell=True, check=True, executable='/bin/bash')
 
 def main():
 	parser = argparse.ArgumentParser(description="Process methylation data against gene intervals in BED format.")
@@ -105,7 +123,17 @@ def main():
 	parser.add_argument("-b", "--bed", required=True, help="BED file with gene intervals")
 	args = parser.parse_args()
 
-	process_files(args.input, args.bed, args.output)
+	# Create a temporary sorted file name
+	sorted_txt_file = f"{args.input}.sorted.tmp"
+
+	# First, run the shell command to process the input file
+	run_shell_command(args.input, sorted_txt_file)
+
+	# Now process the sorted file with the main logic
+	calcu_methy(sorted_txt_file, args.bed, args.output)
+
+	# Remove the intermediate sorted file
+	os.remove(sorted_txt_file)
 
 
 if __name__ == "__main__":
