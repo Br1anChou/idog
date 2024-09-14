@@ -1,28 +1,38 @@
-#!/bin/bash
+#!/bin/bash -e
 
 ###software vision###
 #sratoolkit:3.0.2
 #pigz:2.4
 
 ###parameter###
-software_dir=/PATH/sratoolkit.3.0.2-centos_linux64/bin
-out_dir=/PATH
-sample_id=SRRXXXX
-ncpus=10
+#sra_dir=/p300s/zhaowm_group/sunjiani/projects/RNA_seq/PRJNA847879/SRR19614475
+sra_dir=$1
+#out_dir=/p300s/zhaowm_group/tangbx/idog/test
+out_dir=$2
+#sample_id=SRR19614475
+sample_id=$3
+#ncpus=10
+ncpus=$4
 ##############
 
-mkdir -p ${out_dir}/reads
-cd ${out_dir}/reads
+source activate RNAseq_E4
 
-${software_dir}/vdb-validate ./$sample_id
+mkdir -p ${out_dir}/${sample_id}/reads
+cd ${out_dir}/${sample_id}/reads
 
-${software_dir}/fasterq-dump \
+vdb-validate --version
+vdb-validate ${sra_dir}/${sample_id}.sra
+
+fasterq-dump \
 -e ${ncpus} --split-3 \
---outdir ${out_dir}/reads \
-./${sample_id}
+--outdir ${out_dir}/${sample_id}/reads \
+${sra_dir}/${sample_id}.sra
 
 pigz -p ${ncpus} ./${sample_id}_1.fastq
 pigz -p ${ncpus} ./${sample_id}_2.fastq
+pigz -p ${ncpus} ./${sample_id}.fastq
 
-rm -rf ./${sample_id}_1.fastq
-rm -rf ./${sample_id}_2.fastq
+#rm -rf ./${sample_id}_1.fastq
+#rm -rf ./${sample_id}_2.fastq
+
+conda deactivate

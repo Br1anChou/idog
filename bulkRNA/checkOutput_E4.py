@@ -8,7 +8,7 @@
 # @Project    :idog
 # @Version    :python 3.10.6
 # @Description:The input parameter path cannot include the sample ID
-# @Usage      :python3 checkOutput_E4.py -p /path -i SRR12345678
+# @Usage      :python checkOutput_E4.py -p /results_path -i SRRXXXX
 
 
 import os

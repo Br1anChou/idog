@@ -7,8 +7,8 @@
 # @Product    :DataSpell
 # @Project    :idog
 # @Version    :python 3.10.6
-# @Description:
-# @Usage      :
+# @Description:Gene expression matrix normalisation
+# @Usage      :python3 calcuLog2.py -h
 
 import pandas as pd
 import argparse

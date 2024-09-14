@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-# @File       :mergeExpression
+# @File       :mergeExpression.py
 # @Time       :2024/6/20 09:52
 # @Author     :zhoubw
 # @Product    :DataSpell
 # @Project    :RNAseq_pipeline
 # @Version    :python 3.10.6
-# @Description:
+# @Description:merge gene expression matrix
 # @Usage      :python mergeExpression.py -i “expression_matrices/sample*.tsv” -o combined_expression_matrix.tsv
 
 import os

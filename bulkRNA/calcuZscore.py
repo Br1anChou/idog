@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-# @File       :calcuZscore
+# @File       :calcuZscore.py
 # @Time       :2024/6/7 12:33
 # @Author     :zhoubw
 # @Product    :DataSpell
 # @Project    :idog
 # @Version    :python 3.10.6
-# @Description:
-# @Usage      :
+# @Description:calculate z-score
+# @Usage      :python calcuZscore.py -h
 
 import pandas as pd
 import argparse

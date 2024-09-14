@@ -1,23 +1,23 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-# @File       :classifyGroups
+# @File       :classifyGroups.py -h
 # @Time       :2024/6/13 14:52
 # @Author     :zhoubw
 # @Product    :DataSpell
 # @Project    :idog
 # @Version    :python 3.10.6
-# @Description:
-# @Usage      :
+# @Description:Write IDs to a separate sample list file based on grouping information(tsv format)
+# @Usage      :python classifyGroups.py -h
 
 import csv
 import os
 
 def process_tsv(input_file):
-	# 创建一个字典来存储group和对应的run_id列表
+	# Create a dictionary to store the list of groups and corresponding run_ids
 	group_dict = {}
 
-	# 读取TSV文件
+	# read tsv file
 	with open(input_file, newline='') as tsvfile:
 		reader = csv.DictReader(tsvfile, delimiter='\t')
 		for row in reader:
@@ -27,7 +27,7 @@ def process_tsv(input_file):
 				group_dict[group] = []
 			group_dict[group].append(run_id)
 
-	# 为每个group创建一个新的文件，并写入对应的run_id
+	# Create a new file for each group and write in the corresponding run_id
 	os.chdir(os.path.dirname(input_file))
 	print("Current working directory:", os.getcwd())
 
@@ -36,6 +36,6 @@ def process_tsv(input_file):
 			for run_id in run_ids:
 				outfile.write(f"{run_id}\n")
 
-# 示例：调用函数并传入TSV文件的路径
-process_tsv('/Users/zhoubw/Documents/01 Work/02 Project/05 iDog/RNA/disease/standard_disease.txt')
+# example
+process_tsv('/PATH/groups.txt')
 

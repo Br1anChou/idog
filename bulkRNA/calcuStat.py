@@ -1,26 +1,26 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-# @File       :calcuStat
+# @File       :calcuStat.py
 # @Time       :2024/6/11 10:00
 # @Author     :zhoubw
 # @Product    :DataSpell
 # @Project    :idog
 # @Version    :python 3.10.6
-# @Description:
-# @Usage      :
+# @Description:Calculate maximum, minimum, median and mean values for each gene
+# @Usage      :python calcuStat.py -h
 
 import pandas as pd
 import argparse
 
 def calculate_gene_statistics(input_file, output_file):
-	# 读取输入文件
+	# read tsv file
 	df = pd.read_csv(input_file, sep='\t')
 
-	# 保留gene_id列
+	# keep gene_id column
 	gene_ids = df['gene_id']
 
-	# 计算每个基因的最大值、最小值、中位数和平均值
+	# Calculate maximum, minimum, median and mean values for each gene
 	expression_values = df.drop(columns=['gene_id'])
 	max_values = expression_values.max(axis=1)
 	min_values = expression_values.min(axis=1)
@@ -28,10 +28,10 @@ def calculate_gene_statistics(input_file, output_file):
 	mean_values = expression_values.mean(axis=1)
 	std_values = expression_values.std(axis=1)
 
-	# 计算CV值（标准差 / 平均值）
+	# Calculation of CV values (standard deviation / mean)
 	cv_values = std_values / mean_values
 
-	# 创建包含统计值的DataFrame
+	# create dataframe
 	stats_df = pd.DataFrame({
 		'gene_id': gene_ids,
 		'max': max_values,
@@ -41,7 +41,7 @@ def calculate_gene_statistics(input_file, output_file):
 		'cv': cv_values
 	})
 
-	# 保存结果到一个新的文件，使用制表符分隔
+	# output tsv file
 	stats_df.to_csv(output_file, sep='\t', index=False)
 	print(f"Gene statistics saved to {output_file}")
 

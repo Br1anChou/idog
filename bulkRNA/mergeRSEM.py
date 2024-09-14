@@ -1,21 +1,21 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-# @File       :mergeRSEM
+# @File       :mergeRSEM.py
 # @Time       :2024/6/6 16:42
 # @Author     :zhoubw
 # @Product    :DataSpell
 # @Project    :idog
 # @Version    :python 3.10.6
-# @Description:
-# @Usage      :
+# @Description:merge gene expression matrix for RSEM
+# @Usage      :python mergeRSEM.py -h
 
 import os
 import pandas as pd
 import argparse
 
 def merge_gene_expression(input_dir, sample_list_file, output_file, column_choice):
-	# 映射用户输入的列名到实际列名
+	# map to actual column names
 	column_map = {
 		'TPM': 'TPM',
 		'transcript_ids': 'transcript_id(s)',
@@ -30,33 +30,32 @@ def merge_gene_expression(input_dir, sample_list_file, output_file, column_choic
 
 	actual_column = column_map[column_choice]
 
-	# 读取样本列表文件
 	if not os.path.exists(sample_list_file):
 		raise FileNotFoundError(f"The file {sample_list_file} does not exist.")
 
 	with open(sample_list_file, 'r') as f:
 		sample_dirs = [line.strip() for line in f]
 
-	# 检查是否有样本目录名
+	# check sample name in the sample list
 	if not sample_dirs:
 		raise ValueError("The sample list is empty.")
 
-	# 初始化一个空的DataFrame用于存储结果
+	# initialise an empty DataFrame for storing results
 	merged_df = pd.DataFrame()
-	missing_samples = []  # 用于记录不存在的样本ID
+	missing_samples = []  # Used to record non-existent sample IDs
 
-	# 遍历每个样本目录
+	# Iterate over each sample catalogue
 	for sample in sample_dirs:
-		# 定义每个样本的文件路径
+		# file path for each sample
 		file_path = os.path.join(input_dir, sample, "rsem", f"{sample}_rsem.genes.results")
 
-		# 检查文件是否存在
+		# check files
 		if not os.path.exists(file_path):
 			print(f"Warning: The file {file_path} does not exist. Skipping sample {sample}.")
 			missing_samples.append(sample)
 			continue
 
-		# 读取文件
+		# read file
 		try:
 			df = pd.read_csv(file_path, sep='\t', usecols=['gene_id', actual_column])
 		except Exception as e:
@@ -64,21 +63,21 @@ def merge_gene_expression(input_dir, sample_list_file, output_file, column_choic
 			missing_samples.append(sample)
 			continue
 
-		# 重命名选择列为样本ID
+		# Rename the selected column as sample ID
 		df = df.rename(columns={actual_column: sample})
 
-		# 如果merged_df是空的，初始化它
+		# initialise merged_df if it is empty
 		if merged_df.empty:
 			merged_df = df
 		else:
-			# 合并数据
+			# merge data
 			merged_df = pd.merge(merged_df, df, on='gene_id', how='outer')
 
-	# 保存结果到一个新的文件
+	# save file
 	merged_df.to_csv(output_file, sep='\t', index=False)
 	print(f"Merged gene expression matrix saved to {output_file}")
 
-	# 输出不存在的样本ID
+	# Output non-existing sample IDs
 	if missing_samples:
 		print("The following samples were not found or had errors and were skipped:")
 		for sample in missing_samples:
