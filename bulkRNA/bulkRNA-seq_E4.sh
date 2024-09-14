@@ -16,17 +16,11 @@
 #rsem:1.3.3
 
 ###parameter###
-ref_dir=/p300s/zhaowm_group/tangbx/reference/UU_Cfam_GSD_1.0
-#fastq_dir=/p300s/zhaowm_group/tangbx/idog/test
+ref_dir=/path/reference/UU_Cfam_GSD_1.0
 fastq_dir=$1
-#out_dir=/p300s/zhaowm_group/tangbx/idog/test
 out_dir=$2
-#r1_file=SRR8090327.fastq.gz
-#sample_id=SRR8090327
 sample_id=$3
-#ncpus=10
 ncpus=$4
-#ramGB=120
 ramGB=$5
 fwd_prob=0.5
 #############
