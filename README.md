@@ -71,6 +71,3 @@ bash ATAC/callPeaks_ATAC_E4.sh <in_file> <out_dir> <sample_id>
 ```bash
 bash WGBS/WGBS_E3.sh <fastq_dir> <out_dir> <sample_id> <ncpus> <ramGB>
 ```
-
-## Cition
-iDog: A multi-omics resource for canids study. under review, 2024
