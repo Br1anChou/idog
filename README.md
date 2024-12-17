@@ -71,3 +71,6 @@ bash ATAC/callPeaks_ATAC_E4.sh <in_file> <out_dir> <sample_id>
 ```bash
 bash WGBS/WGBS_E3.sh <fastq_dir> <out_dir> <sample_id> <ncpus> <ramGB>
 ```
+
+## Cition
+Yanhu Liu, Yibo Wang, Jiani Sun, Demian Kong, Bowen Zhou, Mengting Ding, Yuyan Meng, Guangya Duan, Ying Cui, Zhuojing Fan, Ya-Ping Zhang, Wenming Zhao, Bixia Tang, iDog: a multi-omics resource for canids study, Nucleic Acids Research, 2024;, gkae1031, https://doi.org/10.1093/nar/gkae1031
